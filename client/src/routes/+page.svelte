@@ -1,31 +1,31 @@
 <script>
 	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	import logo from '$lib/images/cookie.svg';
+
+	let count = 0;
+
+	function handleClick() {
+		count += 1;
+	}
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Cookie Clicker</title>
+	<meta name="description" content="Cookie Clicker App" />
 </svelte:head>
 
 <section>
-	<h1>
 		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
+			<button on:click={handleClick} style="border: none;background: transparent;"> 
+				<img src={logo}  alt="cookie-svg" width={count*2+50+"px"} height={count*2+50+"px"}/>
+			</button>
 		</span>
 
-		to your new<br />SvelteKit app
+	<h1>
+		Cookie Clicker
 	</h1>
 
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
+	<Counter bind:count={count}/>
 </section>
 
 <style>
@@ -42,7 +42,8 @@
 	}
 
 	.welcome {
-		display: block;
+		display: flex;
+		justify-content: center;
 		position: relative;
 		width: 100%;
 		height: 0;
@@ -50,10 +51,6 @@
 	}
 
 	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
 		display: block;
 	}
 </style>
