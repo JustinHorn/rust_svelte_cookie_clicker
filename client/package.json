@@ -1,5 +1,5 @@
 {
-	"name": "client",
+	"name": "rust_svelte_cookie_clicker_client",
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "vite dev",

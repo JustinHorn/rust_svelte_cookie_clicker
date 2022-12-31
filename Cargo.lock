@@ -879,7 +879,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust_cookie_clicker"
+name = "rust_svelte_cookie_clicker"
 version = "0.1.0"
 dependencies = [
  "chrono",
