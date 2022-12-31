@@ -25,31 +25,36 @@ async fn main() {
         .and(with_db(db_pool.clone()))
         .and_then(handler::health_handler);
 
-    let todo = warp::path("todo");
-    let todo_routes = todo
+    let player = warp::path("player");
+    let player_routes = player
         .and(warp::get())
-        .and(warp::query())
+        .and(warp::path::param())
         .and(with_db(db_pool.clone()))
-        .and_then(handler::list_todos_handler)
-        .or(todo
+        .and_then(handler::get_player_handler)
+        .or(player
+            .and(warp::get())
+            .and(warp::query())
+            .and(with_db(db_pool.clone()))
+            .and_then(handler::list_players_handler))
+        .or(player
             .and(warp::post())
             .and(warp::body::json())
             .and(with_db(db_pool.clone()))
-            .and_then(handler::create_todo_handler))
-        .or(todo
+            .and_then(handler::create_player_handler))
+        .or(player
             .and(warp::put())
             .and(warp::path::param())
             .and(warp::body::json())
             .and(with_db(db_pool.clone()))
-            .and_then(handler::update_todo_handler))
-        .or(todo
+            .and_then(handler::update_player_handler))
+        .or(player
             .and(warp::delete())
             .and(warp::path::param())
             .and(with_db(db_pool.clone()))
-            .and_then(handler::delete_todo_handler));
+            .and_then(handler::delete_player_handler));
 
     let routes = health_route
-        .or(todo_routes)
+        .or(player_routes)
         .with(warp::cors().allow_any_origin())
         .recover(error::handle_rejection);
 

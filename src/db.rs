@@ -13,8 +13,8 @@ const DB_POOL_MAX_OPEN: u64 = 32;
 const DB_POOL_MAX_IDLE: u64 = 8;
 const DB_POOL_TIMEOUT_SECONDS: u64 = 15;
 const INIT_SQL: &str = "./db.sql";
-const TABLE: &str = "todo";
-const SELECT_FIELDS: &str = "id, name, created_at, checked";
+const TABLE: &str = "player";
+const SELECT_FIELDS: &str = "id, name, created_at, count";
 
 pub async fn init_db(db_pool: &DBPool) -> Result<()> {
     let init_file = fs::read_to_string(INIT_SQL)?;
@@ -40,7 +40,7 @@ pub fn create_pool() -> std::result::Result<DBPool, mobc::Error<Error>> {
         .build(manager))
 }
 
-pub async fn fetch_todos(db_pool: &DBPool, search: Option<String>) -> Result<Vec<Todo>> {
+pub async fn fetch_players(db_pool: &DBPool, search: Option<String>) -> Result<Vec<Player>> {
     let con = get_db_con(db_pool).await?;
     let where_clause = match search {
         Some(_) => "WHERE name like $1",
@@ -56,33 +56,43 @@ pub async fn fetch_todos(db_pool: &DBPool, search: Option<String>) -> Result<Vec
     };
     let rows = q.map_err(DBQueryError)?;
 
-    Ok(rows.iter().map(|r| row_to_todo(&r)).collect())
+    Ok(rows.iter().map(|r| row_to_player(&r)).collect())
 }
 
-pub async fn create_todo(db_pool: &DBPool, body: TodoRequest) -> Result<Todo> {
+pub async fn fetch_player(db_pool: &DBPool, id: i32) -> Result<Player> {
+    let con = get_db_con(db_pool).await?;
+    let query = format!("SELECT {} FROM {} WHERE id = $1", SELECT_FIELDS, TABLE);
+    let row = con
+        .query_one(query.as_str(), &[&id])
+        .await
+        .map_err(DBQueryError)?;
+    Ok(row_to_player(&row))
+}
+
+pub async fn create_player(db_pool: &DBPool, body: PlayerRequest) -> Result<Player> {
     let con = get_db_con(db_pool).await?;
     let query = format!("INSERT INTO {} (name) VALUES ($1) RETURNING *", TABLE);
     let row = con
         .query_one(query.as_str(), &[&body.name])
         .await
         .map_err(DBQueryError)?;
-    Ok(row_to_todo(&row))
+    Ok(row_to_player(&row))
 }
 
-pub async fn update_todo(db_pool: &DBPool, id: i32, body: TodoUpdateRequest) -> Result<Todo> {
+pub async fn update_player(db_pool: &DBPool, id: i32, body: PlayerUpdateRequest) -> Result<Player> {
     let con = get_db_con(db_pool).await?;
     let query = format!(
-        "UPDATE {} SET name = $1, checked = $2 WHERE id = $3 RETURNING *",
+        "UPDATE {} SET name = $1, count = $2 WHERE id = $3 RETURNING *",
         TABLE
     );
     let row = con
-        .query_one(query.as_str(), &[&body.name, &body.checked, &id])
+        .query_one(query.as_str(), &[&body.name, &body.count, &id])
         .await
         .map_err(DBQueryError)?;
-    Ok(row_to_todo(&row))
+    Ok(row_to_player(&row))
 }
 
-pub async fn delete_todo(db_pool: &DBPool, id: i32) -> Result<u64> {
+pub async fn delete_player(db_pool: &DBPool, id: i32) -> Result<u64> {
     let con = get_db_con(db_pool).await?;
     let query = format!("DELETE FROM {} WHERE id = $1", TABLE);
     con.execute(query.as_str(), &[&id])
@@ -90,15 +100,15 @@ pub async fn delete_todo(db_pool: &DBPool, id: i32) -> Result<u64> {
         .map_err(DBQueryError)
 }
 
-fn row_to_todo(row: &Row) -> Todo {
+fn row_to_player(row: &Row) -> Player {
     let id: i32 = row.get(0);
     let name: String = row.get(1);
     let created_at: DateTime<Utc> = row.get(2);
-    let checked: bool = row.get(3);
-    Todo {
+    let count: i32 = row.get(3);
+    Player {
         id,
         name,
         created_at,
-        checked,
+        count,
     }
 }
