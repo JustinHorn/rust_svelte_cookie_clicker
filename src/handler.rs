@@ -35,15 +35,24 @@ pub async fn create_player_handler(body: PlayerRequest, db_pool: DBPool) -> Resu
 }
 
 pub async fn update_player_handler(
-    id: i32,
+    id_or_name: String,
     body: PlayerUpdateRequest,
     db_pool: DBPool,
 ) -> Result<impl Reply> {
-    Ok(json(&PlayerResponse::of(
-        db::update_player(&db_pool, id, body)
-            .await
-            .map_err(|e| reject::custom(e))?,
-    )))
+    let id = id_or_name.parse::<i32>();
+
+    match id {
+        Ok(id) => Ok(json(&PlayerResponse::of(
+            db::update_player_by_id(&db_pool, id, body)
+                .await
+                .map_err(|e| reject::custom(e))?,
+        ))),
+        Err(_) => Ok(json(&PlayerResponse::of(
+            db::update_player_by_name(&db_pool, id_or_name, body)
+                .await
+                .map_err(|e| reject::custom(e))?,
+        ))),
+    }
 }
 
 pub async fn delete_player_handler(id: i32, db_pool: DBPool) -> Result<impl Reply> {
@@ -53,9 +62,21 @@ pub async fn delete_player_handler(id: i32, db_pool: DBPool) -> Result<impl Repl
     Ok(StatusCode::OK)
 }
 
-pub async fn get_player_handler(id: i32, db_pool: DBPool) -> Result<impl Reply> {
-    let player = db::fetch_player(&db_pool, id)
-        .await
-        .map_err(|e| reject::custom(e))?;
-    Ok(json(&PlayerResponse::of(player)))
+pub async fn get_player_handler(id_or_name: String, db_pool: DBPool) -> Result<impl Reply> {
+    let id = id_or_name.parse::<i32>();
+
+    match id {
+        Ok(id) => {
+            let player = db::fetch_player_by_id(&db_pool, id)
+                .await
+                .map_err(|e| reject::custom(e))?;
+            return Ok(json(&PlayerResponse::of(player)));
+        }
+        Err(_) => {
+            let player = db::fetch_player_by_name(&db_pool, id_or_name)
+                .await
+                .map_err(|e| reject::custom(e))?;
+            return Ok(json(&PlayerResponse::of(player)));
+        }
+    }
 }

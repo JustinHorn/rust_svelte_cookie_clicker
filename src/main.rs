@@ -31,7 +31,7 @@ async fn main() {
         .and(warp::path::param())
         .and(with_db(db_pool.clone()))
         .and_then(handler::get_player_handler)
-        .or(player
+        .or(warp::path("players")
             .and(warp::get())
             .and(warp::query())
             .and(with_db(db_pool.clone()))

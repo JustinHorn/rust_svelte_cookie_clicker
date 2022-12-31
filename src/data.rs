@@ -16,7 +16,6 @@ pub struct PlayerRequest {
 
 #[derive(Deserialize)]
 pub struct PlayerUpdateRequest {
-    pub name: String,
     pub count: i32,
 }
 

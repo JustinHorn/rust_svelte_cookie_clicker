@@ -59,11 +59,21 @@ pub async fn fetch_players(db_pool: &DBPool, search: Option<String>) -> Result<V
     Ok(rows.iter().map(|r| row_to_player(&r)).collect())
 }
 
-pub async fn fetch_player(db_pool: &DBPool, id: i32) -> Result<Player> {
+pub async fn fetch_player_by_id(db_pool: &DBPool, id: i32) -> Result<Player> {
     let con = get_db_con(db_pool).await?;
     let query = format!("SELECT {} FROM {} WHERE id = $1", SELECT_FIELDS, TABLE);
     let row = con
         .query_one(query.as_str(), &[&id])
+        .await
+        .map_err(DBQueryError)?;
+    Ok(row_to_player(&row))
+}
+
+pub async fn fetch_player_by_name(db_pool: &DBPool, name: String) -> Result<Player> {
+    let con = get_db_con(db_pool).await?;
+    let query = format!("SELECT {} FROM {} WHERE name = $1", SELECT_FIELDS, TABLE);
+    let row = con
+        .query_one(query.as_str(), &[&name])
         .await
         .map_err(DBQueryError)?;
     Ok(row_to_player(&row))
@@ -79,14 +89,32 @@ pub async fn create_player(db_pool: &DBPool, body: PlayerRequest) -> Result<Play
     Ok(row_to_player(&row))
 }
 
-pub async fn update_player(db_pool: &DBPool, id: i32, body: PlayerUpdateRequest) -> Result<Player> {
+pub async fn update_player_by_name(
+    db_pool: &DBPool,
+    name: String,
+    body: PlayerUpdateRequest,
+) -> Result<Player> {
     let con = get_db_con(db_pool).await?;
     let query = format!(
-        "UPDATE {} SET name = $1, count = $2 WHERE id = $3 RETURNING *",
+        "UPDATE {} SET count = $1 WHERE name = $2 RETURNING *",
         TABLE
     );
     let row = con
-        .query_one(query.as_str(), &[&body.name, &body.count, &id])
+        .query_one(query.as_str(), &[&body.count, &name])
+        .await
+        .map_err(DBQueryError)?;
+    Ok(row_to_player(&row))
+}
+
+pub async fn update_player_by_id(
+    db_pool: &DBPool,
+    id: i32,
+    body: PlayerUpdateRequest,
+) -> Result<Player> {
+    let con = get_db_con(db_pool).await?;
+    let query = format!("UPDATE {} SET count = $1 WHERE id = $2 RETURNING *", TABLE);
+    let row = con
+        .query_one(query.as_str(), &[&body.count, &id])
         .await
         .map_err(DBQueryError)?;
     Ok(row_to_player(&row))
