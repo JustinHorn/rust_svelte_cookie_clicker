@@ -1,12 +1,67 @@
 <script>
 	import Counter from './Counter.svelte';
 	import logo from '$lib/images/cookie.svg';
+	import { onMount } from 'svelte';
+
+	let playerName = "";
+	
+	let loginName = "";
+	let registerName = "";
 
 	let count = 0;
+
+	onMount(
+		() => {
+			const localPlayerName = localStorage.getItem('playerName');
+			if (localPlayerName) {
+				playerName = localPlayerName;
+				login();
+			}
+		}
+	)
+
 
 	function handleClick() {
 		count += 1;
 	}
+
+	function login() {
+		fetch('http://localhost:8000/player/'+loginName,)
+			.then( res => res.json()).then(data => {
+				playerName = data.name;
+				count = data.count;
+				localStorage.setItem('playerName', playerName);
+			}).catch(err => console.log(err))
+	}
+
+	function register() {
+		fetch('http://localhost:8000/player', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({name: registerName})
+			}).then( res => res.json()).then(data => {
+				playerName = data.name;
+				count = data.count;
+			}).catch(err => console.log(err))
+	}
+
+	function logout() {
+		playerName = "";
+		count = 0;
+		localStorage.removeItem('playerName');
+	}
+
+	let mountCount = 0;
+
+	$: count !== mountCount && fetch('http://localhost:8000/player/'+playerName, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({count: count})
+	}).catch(err => console.log(err));
 </script>
 
 <svelte:head>
@@ -15,20 +70,40 @@
 </svelte:head>
 
 <section>
+	<h1>
+		Cookie Clicker
+	</h1>
+	{#if playerName === ""} 
+		<div>
+			<h3>Login</h3>
+			<input type="text" bind:value={loginName} placeholder="Enter your name" />
+			<button on:click={() => loginName !== "" && login()}>Submit</button>
+		</div>
+		<div>
+			<h3>Register</h3>
+			<input type="text" bind:value={registerName} placeholder="Enter your name" />
+			<button on:click={() => registerName !== "" && register()}>Submit</button>
+		</div>
+	{:else}
+		<p>Hello <span class="underscore">{playerName}</span>!</p>
 		<span class="welcome">
 			<button on:click={handleClick} style="border: none;background: transparent;"> 
 				<img src={logo}  alt="cookie-svg" width={count*2+50+"px"} height={count*2+50+"px"}/>
 			</button>
 		</span>
-
-	<h1>
-		Cookie Clicker
-	</h1>
-
-	<Counter bind:count={count}/>
+		<Counter bind:count={count}/>
+		<button class="logout" on:click={() => {
+			loginName = playerName;
+			logout();
+		}} >Logout</button>
+	{/if}
 </section>
 
 <style>
+
+	button {
+		cursor: pointer;
+	}
 	section {
 		display: flex;
 		flex-direction: column;
@@ -52,5 +127,16 @@
 
 	.welcome img {
 		display: block;
+	}
+
+	.underscore {
+		text-decoration: underline;
+	}
+
+	.logout {
+		position: absolute;
+		bottom: 2rem;
+		left: 2rem;
+		border: none;
 	}
 </style>

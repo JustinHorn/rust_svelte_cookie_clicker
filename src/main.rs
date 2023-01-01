@@ -55,7 +55,19 @@ async fn main() {
 
     let routes = health_route
         .or(player_routes)
-        .with(warp::cors().allow_any_origin())
+        .with(
+            warp::cors()
+                .allow_any_origin()
+                .allow_headers(vec![
+                    "Access-Control-Allow-Origin",
+                    "Origin",
+                    "Accept",
+                    "X-Requested-With",
+                    "Content-Type",
+                ])
+                .allow_methods(vec!["GET", "POST", "PUT", "DELETE"]),
+        )
+        .with(warp::log("api"))
         .recover(error::handle_rejection);
 
     warp::serve(routes).run(([127, 0, 0, 1], 8000)).await;

@@ -66,6 +66,7 @@ pub async fn fetch_player_by_id(db_pool: &DBPool, id: i32) -> Result<Player> {
         .query_one(query.as_str(), &[&id])
         .await
         .map_err(DBQueryError)?;
+    println!("Fetched player {}", id);
     Ok(row_to_player(&row))
 }
 
@@ -76,6 +77,7 @@ pub async fn fetch_player_by_name(db_pool: &DBPool, name: String) -> Result<Play
         .query_one(query.as_str(), &[&name])
         .await
         .map_err(DBQueryError)?;
+    println!("Fetched player {}", name);
     Ok(row_to_player(&row))
 }
 
@@ -108,6 +110,7 @@ pub async fn update_player_by_name(
         .query_one(query.as_str(), &[&body.count, &name])
         .await
         .map_err(DBQueryError)?;
+    println!("Updated player {} count to {}", name, body.count);
     Ok(row_to_player(&row))
 }
 
@@ -122,6 +125,7 @@ pub async fn update_player_by_id(
         .query_one(query.as_str(), &[&body.count, &id])
         .await
         .map_err(DBQueryError)?;
+    println!("Updated player {} count to {}", id, body.count);
     Ok(row_to_player(&row))
 }
 

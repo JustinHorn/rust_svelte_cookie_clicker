@@ -1,11 +1,6 @@
 <script>
-	import { onMount } from 'svelte';
 	import Header from './Header.svelte';
 	import './styles.css';
-	onMount(async function () {
-  		const response = await fetch("localhost:3000/api");
-  		const data = await response.json();
-	});
 </script>
 
 <div class="app">
@@ -33,21 +28,5 @@
 		box-sizing: border-box;
 	}
 
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
 
-	footer a {
-		font-weight: bold;
-	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
 </style>
