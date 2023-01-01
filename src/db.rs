@@ -80,13 +80,18 @@ pub async fn fetch_player_by_name(db_pool: &DBPool, name: String) -> Result<Play
 }
 
 pub async fn create_player(db_pool: &DBPool, body: PlayerRequest) -> Result<Player> {
-    let con = get_db_con(db_pool).await?;
-    let query = format!("INSERT INTO {} (name) VALUES ($1) RETURNING *", TABLE);
-    let row = con
-        .query_one(query.as_str(), &[&body.name])
-        .await
-        .map_err(DBQueryError)?;
-    Ok(row_to_player(&row))
+    match body.name.parse::<i32>() {
+        Ok(_) => return Err(PlayerNameCantBeANumberError()),
+        Err(_) => {
+            let con = get_db_con(db_pool).await?;
+            let query = format!("INSERT INTO {} (name) VALUES ($1) RETURNING *", TABLE);
+            let row = con
+                .query_one(query.as_str(), &[&body.name])
+                .await
+                .map_err(DBQueryError)?;
+            Ok(row_to_player(&row))
+        }
+    }
 }
 
 pub async fn update_player_by_name(

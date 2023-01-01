@@ -14,6 +14,8 @@ pub enum Error {
     DBInitError(tokio_postgres::Error),
     #[error("error reading file: {0}")]
     ReadFileError(#[from] std::io::Error),
+    #[error("error creating player:")]
+    PlayerNameCantBeANumberError(),
 }
 
 #[derive(Serialize)]
@@ -38,6 +40,10 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
             Error::DBQueryError(_) => {
                 code = StatusCode::BAD_REQUEST;
                 message = "Could not Execute request";
+            }
+            Error::PlayerNameCantBeANumberError() => {
+                code = StatusCode::BAD_REQUEST;
+                message = "Player Name cant be a number";
             }
             _ => {
                 eprintln!("unhandled application error: {:?}", err);
