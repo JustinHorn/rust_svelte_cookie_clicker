@@ -8,7 +8,7 @@
 		<img src={logo} alt="Logo" />
 	</div>
 	<div class="bottom-right">
-		<a>
+		<a href="https://github.com/JustinHorn/rust_svelte_cookie_clicker">
 			<img src={github} alt="Code" />
 		</a>
 	</div>
