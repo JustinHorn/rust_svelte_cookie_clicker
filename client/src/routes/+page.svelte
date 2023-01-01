@@ -86,12 +86,12 @@
 		</div>
 	{:else}
 		<p>Hello <span class="underscore">{playerName}</span>!</p>
+		<Counter bind:count={count}/>
 		<span class="welcome">
 			<button on:click={handleClick} style="border: none;background: transparent;"> 
 				<img src={logo}  alt="cookie-svg" width={count*2+50+"px"} height={count*2+50+"px"}/>
 			</button>
 		</span>
-		<Counter bind:count={count}/>
 		<button class="logout" on:click={() => {
 			loginName = playerName;
 			logout();
@@ -135,8 +135,7 @@
 
 	.logout {
 		position: absolute;
-		bottom: 2rem;
-		left: 2rem;
-		border: none;
+		top: 2rem;
+		right: 2rem;
 	}
 </style>
