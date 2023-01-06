@@ -3,7 +3,8 @@
 	import logo from '$lib/images/cookie.svg';
 	import { onMount } from 'svelte';
 
-	const basepath = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost:8000/';
+	const baseURL = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost:8000/'
+
 
 	let playerName = "";
 	
@@ -28,7 +29,7 @@
 	}
 
 	function login() {
-		fetch(basepath +'player/'+loginName,)
+		fetch( baseURL+'player/'+loginName,)
 			.then( res => res.json()).then(data => {
 				playerName = data.name;
 				count = data.count;
@@ -37,7 +38,7 @@
 	}
 
 	function register() {
-		fetch(basepath + 'player', {
+		fetch(baseURL+'player', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -57,7 +58,7 @@
 
 	let mountCount = 0;
 
-	$: count !== mountCount && fetch(basepath + 'player/'+playerName, {
+	$: count !== mountCount && fetch(baseURL+'player/'+playerName, {
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json'
