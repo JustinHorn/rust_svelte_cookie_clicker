@@ -53,6 +53,8 @@ async fn main() {
             .and(with_db(db_pool.clone()))
             .and_then(handler::delete_player_handler));
 
+    let log = warp::log("duploy::api");
+
     let routes = health_route
         .or(player_routes)
         .with(
@@ -67,6 +69,8 @@ async fn main() {
                 ])
                 .allow_methods(vec!["GET", "POST", "PUT", "DELETE"]),
         )
+        .or(warp::fs::dir("./client/build"))
+        .or(warp::fs::file("./client/build/index.html"))
         .with(warp::log("api"))
         .recover(error::handle_rejection);
 
