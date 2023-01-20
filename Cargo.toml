@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4.23", features = ["serde"] }
+dotenv = "0.15.0"
 mobc = "0.7.3"
 mobc-postgres = { version = "0.7.0", features = ["with-chrono-0_4"] }
 serde = {version = "1.0.152", features = ["derive"] }
