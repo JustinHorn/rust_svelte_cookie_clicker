@@ -31,7 +31,10 @@ pub async fn get_db_con(db_pool: &DBPool) -> Result<DBCon> {
 }
 
 pub fn create_pool() -> std::result::Result<DBPool, mobc::Error<Error>> {
-    let config = Config::from_str(env::var("POSTGRES_URL").unwrap().as_str())?;
+    let postgres_url = env::var("POSTGRES_URL").unwrap();
+    println!("Connecting to {}", postgres_url);
+
+    let config = Config::from_str(postgres_url.as_str())?;
 
     let manager = PgConnectionManager::new(config, NoTls);
     Ok(Pool::builder()
