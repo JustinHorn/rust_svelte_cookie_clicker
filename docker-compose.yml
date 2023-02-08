@@ -1,14 +1,17 @@
 version: "3.8"
 services:
   server:
-    image: rust_server
+    image: justinhorn/rust_server:1.0.1
     environment:
-     - POSTGRES_URL=postgres://postgres:postgres@host.docker.internal:7878/postgres
+     - POSTGRES_URL=postgres://postgres:postgres@postgres:5432/postgres
     ports:
-      - 8000:8000
+      - 80:8000
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - app-network
+
   postgres:
     image: postgres:latest
     ports:
@@ -22,3 +25,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
